@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Graph0Tool</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="/standalone/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/standalone/favicon.ico" />
+
+    <script src="/standalone/third_party/sigmajs/sigma.min.js"></script>
+    <script src="/standalone/third_party/sigmajs/plugins/sigma.layout.forceAtlas2.min.js"></script>
+    <script src="/standalone/third_party/sigmajs/plugins/sigma.parsers.json.min.js"></script>
+    <script src="/standalone/third_party/sigmajs/plugins/sigma.plugins.animate.min.js"></script>
+    <!-- <script src="/standalone/third_party/sigmajs/plugins/sigma.renderers.edgeLabels.min.js"></script> -->
+</head>
+
+<body>
+    <div style="font-family:monospace;">
+
+        <div class="headbar"
+            style="padding:4px;  padding-left:0px; margin-left:8px; margin-top:0px; border-bottom:1px solid gray;">
+            Endpoint:
+            <select name="ctrl_endpoint__00" id="ctrl_endpoint__00" style="font-family:monospace;">
+
+                <option value="http://localhost:8080">http://localhost:8080</option>
+                <!-- <option value="http://localhost:64210">http://localhost:64210</option>
+                <option value="http://localhost:49210">http://localhost:49210</option> -->
+            </select>
+
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span style="font-size: 18px;">
+                <a href="/">Home</a>
+                <a href="/standalone/visualize.html">Visualize</a>
+                <a href="/standalone/write.html">Write</a>
+            </span>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <button id="run_code" style="min-width: 240px; font-size: 16px;"> Run Query... </button>
+            <button id="init_atlas__00" style="min-width: 96px; font-size: 16px;"> Init Atlas</button>
+            <button id="stop_atlas__00" style="min-width: 96px; font-size: 16px;"> Stop Atlas</button>
+
+        </div>
+
+        <div class="row" style="padding:4px; padding-left:0px; margin-left:8px; ">
+            <textarea id="code" cols="96" rows="4"
+                style="font-family:Consolas,'Courier New', Courier, monospace; font-size:14px;  padding:12px; color:springgreen; background: #333; border:none; border-left:8px solid #043;"></textarea>
+            <textarea id="output__00" cols="56" rows="6"></textarea>
+        </div>
+
+        <div class="row" style="padding:4px; padding-left:0px; margin-left:8px; ">
+            <div id="visualize" style="height:72vh; background:#999;"> </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" charset="utf-8">
+        function changeEndpoint(endpoint) {
+            window.localStorage.setItem('CAYLEY_ENDPOINT', endpoint)
+            document.querySelector('#ctrl_endpoint__00').value = endpoint
+            if ("http://localhost:49210" == endpoint) {
+                // document.querySelector('.menubar').style.background = "red"
+            }
+            else {
+                // document.querySelector('.menubar').style.background = "white"
+            }
+        }
+        changeEndpoint(window.localStorage.getItem('CAYLEY_ENDPOINT') || "http://localhost:8080")
+        document.querySelector('#ctrl_endpoint__00').addEventListener('change', function (event) {
+            console.log('changed')
+            changeEndpoint(this.value)
+        })
+
+
+        document.querySelector('#init_atlas__00').addEventListener('click', function (event) {
+            console.log('init_atlas__00')
+            window.sigmaGraph && sigmaGraph.startForceAtlas2();
+        })
+
+        document.querySelector('#stop_atlas__00').addEventListener('click', function (event) {
+            console.log('stop_atlas__00')
+            window.sigmaGraph && sigmaGraph.stopForceAtlas2();
+        })
+
+        document.querySelector('#code').addEventListener('change', function (event) {
+            // console.log(event)
+            //Luckily chnage is emmited once when focus lost so just send code
+            //on keypress may make it more dynamic
+            document.getElementById('run_code').click()
+            window.sigmaGraph && sigmaGraph.stopForceAtlas2();
+        })
+
+        window.addEventListener("load",function(event){
+            // alert("OnLoad!!!!");
+            document.getElementById('code').value=localStorage.getItem("lattest_query");
+        });
+
+        var nodeMap = {};
+        var ncount = -1;
+        var g = { nodes: [], edges: [] };
+        var createGraphVisualization = function (results) {
+
+            if(results.length<2) return;
+            console.log(results);
+
+            if (window.sigmaGraph !== undefined) {
+                sigmaGraph.stopForceAtlas2()
+                sigmaGraph.kill()
+                document.getElementById("visualize").innerHTML = ''
+            }
+
+            for (var i = 0; i < results.length - 1; i++) { ////IGNORE LAST LINE
+                var result = results[i];
+                if ("$$CLEAR$$" == result) {
+                    nodeMap = {};
+                    ncount = -1;
+                    g = { nodes: [], edges: [] };
+                    continue;
+                }
+                ncount++;
+
+                sid = result["s"];  //source 
+                // eid = result["e"]   // p or q edge
+                tid = result["t"];  //target
+                var source_color
+                var target_color
+                if (result["source_color"] != undefined) {
+                    source_color = result["source_color"]
+                } else {
+                    //source_color = "#2c3e50"
+                    source_color = "#00ff00"
+                }
+                if (result["target_color"] != undefined) {
+                    target_color = result["target_color"]
+                } else {
+                    target_color = "#ff0000"
+                }
+                if (nodeMap[sid] !== true) {
+                    var data = {
+                        id: sid,
+                        x: Math.random(),
+                        y: Math.random(),
+                        size: 8,
+                        color: source_color
+
+                    }
+                    if (result["source_label"] != undefined) {
+                        data.label = result["source_label"]
+                    } else {
+                        data.label = sid
+                    }
+
+                    if (-1 < data.id.indexOf(">p:")) data.color = "#0000ff"
+                    if (-1 < data.id.indexOf(">p:")) data.size = 8
+                    // if (-1 < data.id.indexOf(">q:")) data.color = "#ffff00"
+                    // if (-1 < data.id.indexOf("%")) data.color = "#666"
+                    // if (-1 < data.id.indexOf("%:")) data.color = "#222"
+
+                    g.nodes.push(data)
+                    nodeMap[sid] = true
+                }
+                if (nodeMap[tid] !== true) {
+                    var data = {
+                        id: tid,
+                        x: Math.random(),
+                        y: Math.random(),
+                        size: 8,
+                        color: target_color
+                    }
+                    if (result["target_label"] != undefined) {
+                        data.label = result["target_label"]
+                    } else {
+                        data.label = tid
+                    }
+
+                    if (-1 < data.id.indexOf(">p:")) data.color = "#0000ff"
+                    if (-1 < data.id.indexOf(">p:")) data.size = 8
+                    // if (-1 < data.id.indexOf(">q:")) data.color = "#ffff00"
+                    // if (-1 < data.id.indexOf("%")) data.color = "#666"
+                    // if (-1 < data.id.indexOf("%:")) data.color = "#222"
+
+                    g.nodes.push(data)
+                    nodeMap[tid] = true
+                }
+                g.edges.push({
+                    id:     "e" + ncount,
+                    label:  "e" + ncount,// result["rel"]||"rel",
+                    source: sid,
+                    target: tid,
+                    size: 10,
+                    color: '#ccc'
+                })
+
+            }
+            sigmaGraph = new sigma({
+                graph: g,
+                container: 'visualize',
+                settings: {
+                    defaultNodeColor: '#ec5148',
+                    drawEdgeLabels: true
+                }
+
+            });
+            sigmaGraph.startForceAtlas2();
+            sigmaGraph.forceatlas2.p.linLogMode = true;
+        }
+
+        document.getElementById('run_code').addEventListener('click', function () {
+
+
+            var selectedQueryLanguage = "gizmo"
+            // var data = localStorage.getItem("cayleySavedQueries" + selectedQueryLanguage)
+            var data = "//!!keep!!//\r\n"; //+ localStorage.getItem("monaco_editor_codetext");
+
+            if(!document.getElementById('code').value || ""==document.getElementById('code').value){
+                data = localStorage.getItem("lattest_query");
+            }      
+
+            const ltxt = document.getElementById('code').value;
+            if (-1 < ltxt.indexOf("//!!keep!!//")) {
+                data = ltxt;
+            } else {
+                document.getElementById('code').value = data;
+            }
+
+            localStorage.setItem("lattest_query",data);
+            document.getElementById('output__00').value = "running...";
+
+            try {
+                var xhr = new XMLHttpRequest()
+                xhr.addEventListener("load", function () {
+
+                    var rdata = this.responseText  //IMPORTANT
+                    // console.log(this.responseText)
+
+                    // rdata = rdata.replace(/\\u003c/g, '<').replace(/\\u003e/g, '>')
+                    // try{
+                    //     var links = JSON.parse(rdata)
+                    //     createGraphVisualization(links.result)
+                    //     document.getElementById('output__00').value= "COUNT= " + links.count +"\ngTripleCount= " + links.gTripleCount + "\n" + rdata;
+                    // }catch(ex){
+                    //     document.getElementById('output__00').value=rdata
+                    // }
+
+
+                });
+                xhr.addEventListener("error", function (error_data) {
+                    alert(error_data)
+                })
+                xhr.addEventListener("abort", function (abort_data) {
+                    alert(abort_data)
+                })
+                // xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/query/" + selectedQueryLanguage);
+
+                xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/query0");
+                xhr.send(' ' + data);  //trick not to crash with empty data
+
+            } catch (err) {
+                alert(err)
+
+            }
+
+        });
+
+
+        function loadResults() {
+            try {
+                var xhr = new XMLHttpRequest()
+                xhr.addEventListener("load", function () {
+
+                    var rdata = this.responseText  //IMPORTANT
+
+                    // console.log(this.responseText)
+                    // rdata = rdata.replace(/\\u003c/g, '<').replace(/\\u003e/g, '>')
+                    var results = JSON.parse("[" + rdata + "\"ignore this line\"]");
+                    // console.log(results);
+
+                    try {
+                        //var results = JSON.parse("[" + rdata + "\"ignore this line\"]");                        
+                                           
+                        
+                        // document.getElementById('output__00').value= "COUNT= " + links.count +"\ngTripleCount= " + links.gTripleCount + "\n" + rdata;
+                    } catch (ex) {
+                        // document.getElementById('output__00').value=rdata
+                        alert(ex);
+                    }
+
+                    createGraphVisualization(results)
+                    setTimeout(loadResults, 2000);
+                });
+                xhr.addEventListener("error", function (error_data) {
+                    const octl = document.getElementById('output__00');
+                    octl.value = octl.value + "\nCONNECTION LOST!!!\n"
+                    setTimeout(loadResults, 4000);
+                })
+                xhr.addEventListener("abort", function (abort_data) {
+                    const octl = document.getElementById('output__00');
+                    octl.value = octl.value + "\nCONNECTION LOST!!!\n"
+                    setTimeout(loadResults, 4000);
+                })
+                // xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/query/" + selectedQueryLanguage);
+
+                xhr.open("GET", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/jsonL/0");
+                xhr.send(' ');  //trick not to crash with empty data
+
+            } catch (err) {
+                alert(err)
+
+            }
+        }
+        loadResults();
+
+        function LoadLogs() {
+            // zlog("log!")            
+            var xhr = new XMLHttpRequest()
+            xhr.addEventListener("load", function () {
+                const octl = document.getElementById('output__00');
+                if (false == window.conn_status) {
+                    window.conn_status = true;
+                    octl.value = octl.value + "\nCONNECTION ok!\n"
+                    //beep();
+                }
+
+                var rdata = this.responseText  //IMPORTANT
+                // console.log(this.responseText)
+
+                let txt = ""
+                try {
+                    let rs = JSON.parse(rdata)
+                    for (var i = 0; i < rs.length; i++) {
+                        let r = rs[i]
+                        if (r.t) {
+                            txt = txt + r.v;
+                            //r.z + r.k + r.v;
+                        }
+                        // txt = txt + "y";
+                    }
+                }
+                catch (ex) {
+                    txt = "JSON PARSE ERROR\n;"
+                }
+                // zlog(txt)
+
+                const keep = 10000
+                octl.value =
+                    (2 * keep < octl.value.length ? octl.value.substring(keep) : octl.value) + txt;
+
+                setTimeout(function () {
+                    if (0 < txt.length) {
+                        octl.scrollTop = 10000;
+                    }
+                }, 100);
+
+                setTimeout(LoadLogs, 1000);
+            })
+            xhr.addEventListener("error", function (error_data) {
+                document.getElementById('output__00').value = error_data
+                // document.title = 'DONE - cayley';
+                // document.body.style.cursor = 'default';
+                // alert("no connection!");
+                const octl = document.getElementById('output__00');
+                octl.value = octl.value + "\nCONNECTION LOST!!!\n"
+                window.conn_status = false;
+                setTimeout(LoadLogs, 4000);
+            })
+            var endp = window.localStorage.getItem('CAYLEY_ENDPOINT') || "http://localhost:8080";
+            // var endp = "http://localhost:8080";
+            xhr.open("GET", endp + "/api/v1/logs/0");
+            xhr.send();  //trick not to crash with empty data
+        }
+        LoadLogs();
+
+    </script>
+</body>
+
+</html>

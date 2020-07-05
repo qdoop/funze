@@ -1,0 +1,33 @@
+
+.button111   {
+    padding: 4px;
+    vertical-align: text-bottom;
+    min-width: 96px;
+
+    color: grey;
+}
+
+.static_dlg{
+    position:fixed;
+    top:20px;
+    bottom:20px;
+    left:200px;
+    right:20px;
+    background: gray;
+    z-index: 1000;
+}
+
+#engn_mask__00{
+    margin-left: 8px;
+    width: 200px;
+}
+
+ul{
+    list-style: none;
+    padding: 8px;
+}
+
+li{
+    /* margin: 0;
+    padding: 0; */
+}

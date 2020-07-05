@@ -1,0 +1,35 @@
+﻿
+
+//!!keep!!//
+
+nop
+
+#{
+let MyMethodA()=
+    2255
+
+
+()
+}
+
+// g.Sources.().OutV.(["has"]).OutV.(["color"]).CaptureJSONL.()  pathlist
+// "xxxxzzzzx" .Length
+
+1 2 +  {1 2 +}
+// ge.Version
+
+// ge.TestNodesIerator.( 1000000 ) 
+
+// ge.DumpRawTriples.()
+
+// ["is"] typeinfo
+
+"xxxyyyy" .IndexOf.( "y" )
+"xxxyyyy" .Substring.( 3 2 )
+
+// g.V.([]).out.(["has1" "test"]).traceJSONL.()  pathlist2
+
+
+"xxxx"
+?
+

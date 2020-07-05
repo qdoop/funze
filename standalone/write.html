@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Graph0Tool</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="/standalone/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/standalone/favicon.ico" />
+    <style>
+        input {
+            font-family: monospace;
+            min-width: 20%;
+            padding: 8px;
+        }
+
+        pre {
+            background: #333;
+            padding: 4px;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+
+        .row {
+            background: #888;
+            padding: 5px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="font-family:monospace;">
+
+        <div class="menubar" style="padding:4px; padding-left:12px;">
+            <select name="ctrl_endpoint__00" id="ctrl_endpoint__00" style="font-family:monospace;">
+        <option value="http://localhost:64210">http://localhost:64210</option>
+        <option value="http://localhost:49210">http://localhost:49210</option>
+      </select>
+
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <a href="/standalone/query.html">Query</a>
+            <a href="/standalone/visualize.html">Visualize</a>
+            <a href="/standalone/write.html">Write</a>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <button id="run_code">&nbsp;&nbsp; Run Query &nbsp;&nbsp;</button>
+
+        </div>
+
+        <pre id="status__00">&nbsp;</pre>
+
+        <div class="row">
+            <h2> Write an N-Quads file: </h2>
+            <input id="nquad_file" type="file"></input>
+            <div class="row button-row">
+                <button id="write_file" type="button" class="btn btn-primary">Write File</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <h2> Delete or Write a quad: </h2>
+            <input id="subject" type="text" placeholder="Subject"></input>
+            <input id="predicate" type="text" placeholder="Predicate"></input>
+            <input id="object" type="text" placeholder="Object"></input>
+            <input id="label" type="text" placeholder="Label"></input>
+            <div class="row button-row">
+                <button id="delete_quad" type="button" class="btn">Delete Quad</button>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button id="add_quad" type="button" class="btn">&nbsp;&nbsp;&nbsp;&nbsp; Write Quad &nbsp;&nbsp;&nbsp;&nbsp;</button>
+
+            </div>
+
+        </div>
+
+
+        <!-- <div class="row">
+      <h2> Remove a quad: </h2>
+      <input id="rsubject" type="text" placeholder="Subject"></input>
+      <input id="rpredicate" type="text" placeholder="Predicate"></input>
+      <input id="robject" type="text" placeholder="Object"></input>
+      <input id="rlabel" type="text" placeholder="Label"></input>
+      <div class="row button-row">
+        <button id="delete_quad" type="button" class="btn">Delete Quad</button>
+      </div>
+    </div> -->
+
+
+    </div>
+
+
+    <script type="text/javascript" charset="utf-8">
+        function changeEndpoint(endpoint) {
+            window.localStorage.setItem('CAYLEY_ENDPOINT', endpoint)
+            document.querySelector('#ctrl_endpoint__00').value = endpoint
+            if ("http://localhost:49210" == endpoint) {
+                document.querySelector('.menubar').style.background = "red"
+            }
+            else {
+                document.querySelector('.menubar').style.background = "white"
+            }
+        }
+        changeEndpoint(window.localStorage.getItem('CAYLEY_ENDPOINT') || "http://localhost:64210")
+        document.querySelector('#ctrl_endpoint__00').addEventListener('change', function (event) {
+            console.log('changed')
+            changeEndpoint(this.value)
+        })
+
+
+        var alertFail = function (text) {
+            // alert(text)
+            document.getElementById("status__00").innerHTML = text
+            document.getElementById("status__00").style.color = "red"
+        }
+
+        var alertSucceed = function (text) {
+            // alert(text)
+            document.getElementById("status__00").innerHTML = text
+            document.getElementById("status__00").style.color = "green"
+        }
+
+        var checkQuad = function (t) {
+            if (t.subject == "") {
+                alertFail("Need a subject")
+                return false
+            }
+            if (t.predicate == "") {
+                alertFail("Need a predicate")
+                return false
+            }
+            if (t.object == "") {
+                alertFail("Need an object")
+                return false
+            }
+            return true
+        }
+
+
+        document.getElementById("add_quad").addEventListener('click', function () {
+            document.getElementById("status__00").innerHTML = '&nbsp;'
+            document.getElementById("status__00").style.color = "white"
+            var quad = {
+                subject: document.getElementById("subject").value,
+                predicate: document.getElementById("predicate").value,
+                object: document.getElementById("object").value,
+                label: document.getElementById("label").value
+            }
+            if (!checkQuad(quad)) {
+                return
+            }
+            var xhr = new XMLHttpRequest()
+            upload = xhr
+            xhr.upload.addEventListener("progress", uploadProgress, false)
+            xhr.addEventListener("load", uploadComplete, false)
+            xhr.addEventListener("error", uploadFailed, false)
+            xhr.addEventListener("abort", uploadCanceled, false)
+            xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/write")
+            xhr.send(JSON.stringify([quad]));
+        })
+
+
+
+
+
+        document.getElementById("delete_quad").addEventListener('click', function () {
+            document.getElementById("status__00").innerHTML = '&nbsp;'
+            document.getElementById("status__00").style.color = "white"
+
+            var quad = {
+                subject: document.getElementById("subject").value,
+                predicate: document.getElementById("predicate").value,
+                object: document.getElementById("object").value,
+                label: document.getElementById("label").value
+            }
+            if (!checkQuad(quad)) {
+                return
+            }
+
+            var xhr = new XMLHttpRequest()
+            upload = xhr
+            xhr.upload.addEventListener("progress", uploadProgress, false)
+            xhr.addEventListener("load", uploadComplete, false)
+            xhr.addEventListener("error", uploadFailed, false)
+            xhr.addEventListener("abort", uploadCanceled, false)
+            xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/delete")
+            xhr.send(JSON.stringify([quad]));
+
+        })
+
+        var upload = null
+
+        var uploadProgress = function (event) {
+            if (event.lengthComputable) {
+                var percentComplete = Math.round(event.loaded * 100 / event.total);
+                document.getElementById("status__00").innerHTML = ("Uploaded  " + percentComplete.toString() + "%")
+            } else {
+                document.getElementById("status__00").innerHTML = ("Uploading...")
+            }
+            document.getElementById("status__00").style.color = "white"
+        }
+
+        var uploadComplete = function (event) {
+            let data = JSON.parse(upload.responseText)
+            alertSucceed("Operation complete! " + data.result);
+            upload = null
+        }
+
+        var uploadCanceled = function (event) {
+            upload = null
+            alertFail("Operation canceled!")
+        }
+
+        var uploadFailed = function (event) {
+            upload = null
+            alertFail("Operation failed!")
+        }
+
+        document.getElementById("write_file").addEventListener('click', function () {
+            try {
+
+                var fd = new FormData()
+                fd.append("NQuadFile", document.getElementById("nquad_file").files[0])
+                var xhr = new XMLHttpRequest()
+                upload = xhr
+                xhr.upload.addEventListener("progress", uploadProgress, false)
+                xhr.addEventListener("load", uploadComplete, false)
+                xhr.addEventListener("error", uploadFailed, false)
+                xhr.addEventListener("abort", uploadCanceled, false)
+                xhr.open("POST", window.localStorage.getItem('CAYLEY_ENDPOINT') + "/api/v1/write/file/nquad")
+                xhr.send(fd);
+
+            } catch (err) {
+                alertFail(err)
+            }
+        })
+    </script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <!-- <AssemblyName>xxx</AssemblyName> -->
+  </PropertyGroup>
+
+<!-- 
+    <ItemGroup>  
+        <ProjectReference Include="../fz0wrap/fz0wrap.fsproj" />  
+    </ItemGroup> -->
+    <ItemGroup>
+    <!-- <ProjectReference Include="..\app0library\app0library.csproj" /> -->
+    <!-- <ProjectReference Include="..\gstore0lib\gstore0lib.csproj" /> -->
+  </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CRoaring.Net" Version="0.2.22" />
+        <PackageReference Include="DotLiquid" Version="2.0.314" />
+        <PackageReference Include="dotNetRDF" Version="2.0.1" />
+        <PackageReference Include="FSharp.Compiler.Service" Version="32.0.0" />
+        <PackageReference Include="FSharp.Data" Version="3.1.1" />
+        <PackageReference Include="Hopac" Version="0.4.1" />
+        <PackageReference Include="LiteDB" Version="4.1.4" />
+        <PackageReference Include="LiteDB.FSharp" Version="2.11.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+        <PackageReference Include="Scriban" Version="2.1.0" />
+        <PackageReference Include="Suave" Version="2.2.1" />
+        <PackageReference Include="Suave.DotLiquid" Version="2.5.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Microsoft.CSharp" />
+    </ItemGroup>
+
+
+<ItemGroup>
+    <Compile Include="src/Global.fs" />
+    <Compile Include="src/ErrorTexts.fs" />
+    <Compile Include="src/Helper.fs" />
+    <Compile Include="src/Common.fs" />
+
+
+<Compile Include="src/zscript8tokenA.fs" />
+<Compile Include="src/BuildIns.fs" />
+<Compile Include="src/zInvoke.fs" />
+<Compile Include="src/zscript8cptf.fs" />
+<Compile Include="src/zscript8parser.fs" />
+
+<Compile Include="src/zterm8evaluate.fs" />
+
+    <Compile Include="src/Engine8.fs" />
+    <Compile Include="Program.fs" />
+</ItemGroup>
+
+
+    <!-- <ItemGroup>
+        <Content Include="public/*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup> -->
+
+    <!-- bellow does not work -->
+    <!-- <ItemGroup>
+        <Folder Include="standalone" >
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Folder>
+    </ItemGroup> -->
+
+</Project>

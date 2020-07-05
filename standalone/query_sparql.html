@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Graph0Tool</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="/standalone/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/standalone/favicon.ico" />
+    <link href="/standalone/style.css" rel="stylesheet" />
+    <style>
+        button {
+            padding: 4px;
+            vertical-align: text-bottom;
+            min-width: 96px;
+        }
+    </style>
+</head>
+
+<body style="overflow-x: none;">
+    <div style="font-family:monospace; width: 98vw;">
+
+        <div class="headbar" style="min-height:32px; padding:4px; padding-left:0px; margin-left: 8px; border-bottom:1px solid gray; position: relative;">
+            Endpoint:
+            <select name="ctrl_endpoint__00" id="ctrl_endpoint__00" style="font-family:monospace;">
+                <option value="http://localhost:8080">http://localhost:8080</option>
+                <option value="http://localhost:8080">http://localhost:8080</option>
+                <!-- <option value="http://localhost:64210">http://localhost:64210</option>
+                <option value="http://localhost:49210">http://localhost:49210</option> -->
+            </select>
+            <span>&nbsp;&nbsp;</span>
+            <span style="font-size: 18px;">
+                <a href="/">Home</a>
+                <a href="/standalone/visualize.html">Visualize</a>
+                <a href="/standalone/write.html">Write</a>
+            </span>
+            <span>&nbsp;&nbsp;</span>
+            <span style="display:none;">
+                <button id="gizmo-dropdown" href="#">Gizmo</button>
+                <button id="gremlin-dropdown" href="#">Gremlin</button>
+                <button id="mql-dropdown" href="#">MQL</button>
+                <button id="graphql-dropdown" href="#">GraphQL</button>
+            </span>
+            <span>&nbsp;&nbsp;</span>
+            <span style="font-size: 32px; position:absolute; right:0px;">
+                <b> |.fz Funze</b>
+            </span>
+        </div>
+
+
+        <div class="menubar" style="padding:4px; padding-left:0px; margin-left:8px; background: gray;">
+            <button id="btn_save_as__00"> Save As...</button>
+            <button id="btn_loadfile__00" onclick="document.querySelector('#files__00').click()"> Open (*.fz).///.. </button>
+            <input type="file" id="files__00" name="files[]" multiple placeholder="LoadFiles..." style="display: none;"></input>
+            <span>&nbsp;</span>
+            <button id="run_button" type="button" style="min-width: 320px;">
+                <b>Execute (.fz) Script... </b>
+            </button>
+            <span>&nbsp;</span>
+            <button id="btn_clean__00" onclick="document.getElementById('output__00').value=''"> cls </button>
+        </div>
+
+        <!-- <div class="row" style="display:flex; justify-content:space-around;"> -->
+
+        <div class="row" style="display:flex; position:relative; border1:solid 1px #043;   justify-content:space-between; padding:4px; margin-left:8px;">
+
+
+            <!-- <textarea id="code" cols="120" rows="30" style=" min-height:60vh; width:50vw; "></textarea> -->
+            <div id="code__00" style="width:45vw;height:540px;"></div>
+
+            <div style="display:inline; border1:solid 1px green;padding:0px;">
+
+                <div id="repl__00" style="width:50vw; height:77px;border-left: 20px solid green; padding:0px; margin:0px;"></div>
+                <br>
+                <!-- <br> -->
+                <textarea id="output__00" cols="82" rows="28" style="width:50vw; white-space: nowrap1;overflow: auto; overflow-y:scroll;  "></textarea>
+                
+                <!-- <textarea id="repl__00" cols="80" rows="2" style=" display:inline; margin:0; position:absolute; bottom:-200; right:0;
+    white-space:nowrap; overflow:auto; overflow-y: scroll; padding:8px; color:springgreen; background: #333;
+                    border:none; border-left:8px solid #043; "></textarea> -->
+                
+            </div>
+
+
+        </div>
+
+        <div id="statusbar__00" style="text-align:right; position:fixed; bottom:0px; left:16px; right:16px; padding:4px; background:gray;  ">
+            &nbsp;vvvvvvvvvvvvvvvvvvvvvvv
+        </div>
+
+
+        <!-- 
+<hr>
+        <div id="container" style="width:800px;height:600px; background:red;border:1px solid grey"></div>
+ 
+        <script src="/standalone/third-party/monaco-editor/min/vs/loader.js"></script>
+        <script>
+            require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                var editor = monaco.editor.create(document.getElementById('container'), {
+                    value: [
+                        'function x() {',
+                        '\tconsole.log("Hello world!");',                   '}'
+                    ].join('\n'),
+                    language: 'javascript'
+                });
+            });
+        </script> 
+ -->
+
+
+
+
+
+
+
+
+        <script src="/standalone/third_party/FileSaver.js "></script>
+        <script src="/standalone/third_party/monaco-editor/min/vs/loader.js"></script>
+        <script src="/standalone/editors.js "></script>
+
+
+</body>
+
+</html>
